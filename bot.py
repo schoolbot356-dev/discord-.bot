@@ -5,8 +5,10 @@ from discord import app_commands
 
 # ===== CONFIGURACIÓN =====
 
-# Usar variable de entorno para el token (seguro para GitHub y Railway)
+# Usar variable de entorno para mayor seguridad
 TOKEN = os.environ.get("TOKEN")
+if not TOKEN:
+    raise ValueError("❌ ERROR: La variable de entorno TOKEN no está configurada")
 
 OWNER_ID = 899839608030900225
 
@@ -22,7 +24,6 @@ intents.members = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-
 # ===== PANEL DE BOTONES =====
 
 class PanelRoles(discord.ui.View):
@@ -31,6 +32,7 @@ class PanelRoles(discord.ui.View):
         super().__init__(timeout=None)
 
     async def toggle_role(self, interaction, role_id):
+
         role = interaction.guild.get_role(role_id)
 
         if role in interaction.user.roles:
@@ -70,7 +72,6 @@ class PanelRoles(discord.ui.View):
     async def recordatorios(self, interaction, button):
         await self.toggle_role(interaction, ROLE_RECORDATORIOS_ID)
 
-
 # ===== EVENTO READY =====
 
 @bot.event
@@ -81,9 +82,7 @@ async def on_ready():
         print(f"Slash commands sincronizados: {len(synced)}")
     except Exception as e:
         print(e)
-
     print(f"Bot conectado como {bot.user}")
-
 
 # ===== COMANDO !PANEL =====
 
@@ -103,11 +102,13 @@ async def panel(ctx):
         value="Recibe avisos cuando se publiquen las tareas.",
         inline=False
     )
+
     embed.add_field(
         name="📝 Exámenes",
         value="Recibe avisos cuando se publiquen exámenes.",
         inline=False
     )
+
     embed.add_field(
         name="⏰ Recordatorios",
         value="Recibe avisos especiales importantes.",
@@ -118,12 +119,12 @@ async def panel(ctx):
 
     await ctx.send(embed=embed, view=PanelRoles())
 
-
 # ===== SLASH COMMAND /ARROZ =====
 
 @bot.tree.command(name="arroz", description="Hace que el bot envíe un mensaje")
 @app_commands.describe(mensaje="Mensaje que enviará el bot")
 async def arroz(interaction: discord.Interaction, mensaje: str):
+
     if interaction.user.id != OWNER_ID:
         await interaction.response.send_message(
             "No tienes permiso para usar este comando.",
@@ -137,7 +138,6 @@ async def arroz(interaction: discord.Interaction, mensaje: str):
     )
 
     await interaction.channel.send(mensaje)
-
 
 # ===== INICIAR BOT =====
 
